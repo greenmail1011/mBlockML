@@ -1,0 +1,554 @@
+<title>mBlock 機器學習講義</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Huninn&family=Noto+Sans+TC:wght@400;500;700&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: a student mission booklet for mBlock web — how AI learns, a block field guide, seven basic steps with tick boxes, three game projects, an AI lab with record sheets, more ideas and a stuck-help list. */
+/* Single bright look on purpose (requested light palette). */
+:root{
+  color-scheme:light;
+  --bg:#F2F7FF; --surface:#FFFFFF; --ink:#152238; --muted:#4D5D78; --line:#D6E2F5;
+  --accent:#1F7AE0; --accent-ink:#1559A8; --accent-soft:#DFEDFF;
+  --sun:#FFC53D; --sun-soft:#FFF3D1; --sun-ink:#6E4B00;
+  --danger-soft:#FFE4E0; --danger-ink:#9B2C1D;
+  --ok-soft:#DDF4EC; --ok-ink:#0A6E53;
+  --sb-workspace:#F9F9F9; --sb-grid:#E6E9F0; --sb-blue:#4C97FF; --sb-blue-dark:#3373CC;
+  --b-ev:#FFBF00; --b-ct:#FFAB19; --b-mo:#4C97FF; --b-lo:#9966FF; --b-so:#CF63CF;
+  --b-se:#5CB1D6; --b-op:#59C059; --b-va:#FF8C1A; --b-li:#FF661A; --b-ext:#0FBD8C;
+  --f-display:"Huninn","jf-openhuninn","LXGW WenKai TC","PingFang TC","Microsoft JhengHei",sans-serif;
+  --f-body:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:17px;line-height:1.8;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:880px;margin:0 auto;padding-block:36px 64px;display:flex;flex-direction:column;gap:44px}
+a{color:var(--accent-ink);text-underline-offset:3px}
+:focus-visible{outline:3px solid var(--sun);outline-offset:2px;border-radius:4px}
+h1,h2,h3,h4{font-family:var(--f-display);font-weight:400;margin:0;line-height:1.35;text-wrap:balance}
+p{margin:0}
+
+.hero{display:grid;grid-template-columns:minmax(0,1fr) 230px;gap:24px;align-items:center}
+.hero h1{font-size:clamp(34px,6.5vw,54px)}
+.hero .kicker{font-family:var(--f-display);font-size:18px;color:var(--accent-ink)}
+.hero p.lede{max-width:56ch;color:var(--muted);margin-top:10px}
+.need{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px 16px;display:flex;flex-direction:column;gap:6px;font-size:15px}
+.need b{font-family:var(--f-display);font-weight:400;font-size:17px;color:var(--accent-ink)}
+.need ul{margin:0;padding-left:1.2em}
+@media (max-width:620px){.hero{grid-template-columns:1fr}}
+
+nav ol{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:8px}
+nav a{display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border-radius:999px;background:var(--surface);border:1px solid var(--line);text-decoration:none;color:var(--ink);font-size:15px}
+nav a:hover{border-color:var(--accent)}
+nav .n{font-family:var(--f-mono);font-size:12px;color:var(--accent-ink)}
+
+section{display:flex;flex-direction:column;gap:18px;scroll-margin-top:16px}
+.sec-head{display:flex;flex-direction:column;gap:4px}
+.sec-head .tag{font-size:13px;letter-spacing:.1em;color:var(--accent-ink);font-weight:700}
+.sec-head h2{font-size:30px}
+.sec-head p{color:var(--muted);max-width:62ch}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:22px;display:flex;flex-direction:column;gap:14px;min-width:0}
+@media (max-width:520px){.card{padding:16px 14px}}
+
+.flow{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+@media (max-width:620px){.flow{grid-template-columns:1fr}}
+.flow div{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:6px}
+.flow b{font-family:var(--f-display);font-weight:400;font-size:20px;color:var(--accent-ink)}
+.flow p{font-size:15px;color:var(--muted)}
+
+/* confidence demo bars */
+.conf{display:flex;flex-direction:column;gap:8px}
+.conf div{display:grid;grid-template-columns:90px minmax(0,1fr) 52px;gap:10px;align-items:center;font-size:15px}
+.conf i{display:block;height:14px;border-radius:7px;background:var(--line);overflow:hidden}
+.conf i::before{content:"";display:block;height:100%;width:var(--w);background:var(--accent);border-radius:7px}
+.conf span:last-child{font-family:var(--f-mono);font-size:14px;text-align:right;font-variant-numeric:tabular-nums}
+
+.labels{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.lab{display:flex;align-items:center;gap:10px;background:var(--surface);border:1.5px solid var(--line);border-radius:12px;padding:8px 12px;min-width:0}
+.lab .nm{flex:none;min-width:34px;height:34px;padding:0 8px;border-radius:17px;background:var(--b-ext);color:#fff;font-weight:700;display:grid;place-items:center;font-size:15px}
+.lab.bgl{border-style:dashed}
+.lab.bgl .nm{background:#97A3B6}
+.lab span{font-size:15px;line-height:1.4}
+
+.guide{display:flex;flex-direction:column;gap:8px}
+.gitem{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 14px;display:grid;grid-template-columns:250px minmax(0,1fr);gap:14px;align-items:center;min-width:0}
+.gitem.wide{grid-template-columns:1fr;gap:6px}
+@media (max-width:620px){.gitem{grid-template-columns:1fr;gap:6px}}
+.gitem .g{overflow-x:auto}
+.gitem p{font-size:15px;color:var(--muted)}
+.ggroup{font-family:var(--f-display);font-size:18px;color:var(--accent-ink);margin-top:8px}
+
+.steplist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:14px;counter-reset:s}
+.step{counter-increment:s;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px 20px;display:flex;flex-direction:column;gap:12px;min-width:0}
+@media (max-width:520px){.step{padding:16px 14px}}
+.step-top{display:flex;align-items:flex-start;gap:12px}
+.step-top::before{content:counter(s);flex:none;width:34px;height:34px;border-radius:50%;background:var(--accent);color:#fff;font-family:var(--f-display);font-size:18px;display:grid;place-items:center;box-shadow:0 3px 0 var(--accent-ink)}
+.step-top h3{font-size:22px;flex:1;min-width:0;padding-top:2px}
+.done{flex:none;display:inline-flex;align-items:center;gap:6px;font-size:14px;color:var(--muted);cursor:pointer;user-select:none;padding:4px 10px;border:1px solid var(--line);border-radius:999px;background:var(--bg)}
+.done input{width:18px;height:18px;accent-color:var(--accent);margin:0}
+.step.is-done{border-color:var(--accent);background:linear-gradient(0deg,var(--accent-soft),var(--accent-soft)) top/100% 6px no-repeat,var(--surface)}
+.step.is-done .done{color:var(--accent-ink);border-color:var(--accent)}
+.body{display:flex;flex-direction:column;gap:12px;min-width:0}
+.body p{overflow-wrap:anywhere}
+.body ul,.body ol{margin:0;padding-left:1.3em;display:flex;flex-direction:column;gap:4px}
+
+.cat{display:inline-flex;align-items:center;gap:5px;padding:0 8px 0 4px;margin:0 2px;border-radius:999px;background:#fff;border:1px solid var(--line);font-size:15px;line-height:1.7;white-space:nowrap;vertical-align:1px}
+.cat::before{content:"";width:13px;height:13px;border-radius:50%;background:var(--cc);border:1px solid rgba(0,0,0,.12)}
+.btn{display:inline-block;padding:0 9px;margin:0 2px;border-radius:6px;background:var(--sb-blue);color:#fff;font-size:15px;line-height:1.75;white-space:nowrap;box-shadow:0 2px 0 var(--sb-blue-dark);vertical-align:1px}
+.tab{display:inline-block;padding:0 9px;margin:0 2px;border-radius:6px 6px 0 0;background:#fff;border:1px solid var(--line);border-bottom:2px solid var(--accent);color:var(--accent-ink);font-size:15px;line-height:1.7;white-space:nowrap;vertical-align:1px}
+.ib{display:inline-block;vertical-align:middle;margin:1px 2px;line-height:0}
+.ib svg{display:block}
+.fallback{font-family:var(--f-mono);font-size:13px;line-height:1.5;white-space:pre;background:var(--sb-workspace);border-radius:4px;padding:0 4px}
+
+.script{border:1px solid var(--line);border-radius:12px;overflow:hidden;max-width:100%}
+.script .cap{display:flex;align-items:center;gap:8px;padding:6px 12px;background:#fff;border-bottom:1px solid var(--line);font-size:14px;color:var(--muted)}
+.script .cap::before{content:"";width:16px;height:16px;border-radius:4px;background:var(--sb-blue);opacity:.85}
+.script .area{background-color:var(--sb-workspace);background-image:radial-gradient(var(--sb-grid) 1.2px,transparent 1.3px);background-size:20px 20px;padding:14px;overflow-x:auto}
+.sbcode svg{display:block}
+.sbcode.fallback{display:block}
+
+.tip,.warn,.good{border-radius:12px;padding:12px 16px;font-size:15px;display:flex;flex-direction:column;gap:4px}
+.tip{background:var(--sun-soft);color:var(--sun-ink)}
+.warn{background:var(--danger-soft);color:var(--danger-ink)}
+.good{background:var(--ok-soft);color:var(--ok-ink)}
+.tip b,.warn b,.good b{font-family:var(--f-display);font-weight:400;font-size:17px}
+
+.proj-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px 14px}
+.proj-head h2{font-size:30px}
+.level{font-size:13px;padding:2px 10px;border-radius:999px;background:var(--ok-soft);color:var(--ok-ink);font-weight:700}
+.level.l3{background:var(--danger-soft);color:var(--danger-ink)}
+.learn{font-size:15px;color:var(--muted)}
+.challenge{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+@media (max-width:680px){.challenge{grid-template-columns:1fr}}
+.challenge div{background:var(--bg);border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:4px;min-width:0}
+.challenge h4{font-size:17px;color:var(--accent-ink)}
+.challenge p{font-size:15px}
+
+.labgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media (max-width:680px){.labgrid{grid-template-columns:1fr}}
+.exp{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.exp h3{font-size:20px}
+.exp p{font-size:15px}
+.rec{display:grid;grid-template-columns:minmax(0,1fr) 88px;gap:6px 10px;align-items:center;font-size:15px}
+.rec input{width:100%;font:inherit;font-family:var(--f-mono);font-size:15px;padding:4px 8px;border:1.5px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);text-align:center}
+.rec input:focus,.exp textarea:focus{border-color:var(--accent);outline:none}
+.exp .q{font-size:15px;color:var(--muted)}
+.exp textarea{width:100%;min-height:56px;font:inherit;font-size:15px;padding:6px 10px;border:1.5px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);resize:vertical}
+
+.ideas{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px}
+.idea{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:6px}
+.idea h3{font-size:19px}
+.idea p{font-size:15px;color:var(--muted)}
+.fit{font-size:13px;font-weight:700;color:var(--ok-ink)}
+.fit.no{color:var(--sun-ink)}
+
+.faq{display:flex;flex-direction:column;gap:8px}
+.faq details{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 16px}
+.faq summary{cursor:pointer;font-weight:700}
+.faq details p{margin-top:8px;font-size:15px}
+footer{font-size:13px;color:var(--muted);border-top:1px solid var(--line);padding-top:16px}
+@media (prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
+</style>
+
+<div class="wrap">
+  <header class="hero">
+    <div>
+      <div class="kicker">AI 小訓練師 · 學生講義</div>
+      <h1>mBlock 機器學習講義</h1>
+      <p class="lede">做過 AI 剪刀石頭布了嗎？這次用 mBlock 網頁版，在同一個畫面裡拍照、訓練、寫程式。類別可以取中文名字，還看得到 AI 有幾成把握。換一組訓練照片，就能做出魔法、太空船和魔王對戰。</p>
+    </div>
+    <div class="need"><b>開始前準備</b><ul><li>Chrome 瀏覽器</li><li>網址 ide.mblock.cc</li><li>攝影機（筆電內建也可以）</li><li>光線充足、背景單純的位置</li></ul></div>
+  </header>
+
+  <nav aria-label="目錄"><ol>
+    <li><a href="#how"><span class="n">0</span>AI 怎麼學</a></li>
+    <li><a href="#blocks"><span class="n">1</span>積木圖鑑</a></li>
+    <li><a href="#basic"><span class="n">2</span>基本操作</a></li>
+    <li><a href="#p1"><span class="n">A</span>魔法手勢</a></li>
+    <li><a href="#p2"><span class="n">B</span>手勢太空船</a></li>
+    <li><a href="#p3"><span class="n">C</span>元素魔王挑戰</a></li>
+    <li><a href="#lab"><span class="n">★</span>AI 實驗室</a></li>
+    <li><a href="#ideas"><span class="n">+</span>更多點子</a></li>
+    <li><a href="#help"><span class="n">?</span>卡關了</a></li>
+  </ol></nav>
+
+  <section id="how">
+    <div class="sec-head"><span class="tag">第 0 關</span><h2>AI 是怎麼學會的？</h2></div>
+    <div class="flow">
+      <div><b>① 拍照放進類別</b><p>你比一個手勢，按住「學習」，電腦就連續拍照，放進你取名的類別，例如「剪刀」。</p></div>
+      <div><b>② 訓練找規律</b><p>電腦不會真的看懂「手」，它把照片變成一串數字，找出每個類別的共同特徵。</p></div>
+      <div><b>③ 猜猜看＋打分數</b><p>看到新畫面時，它會替每個類別打一個「信心度」，最高的那個就是識別結果。</p></div>
+    </div>
+    <div class="card">
+      <h3 style="font-size:22px">什麼是「信心度」？</h3>
+      <p>信心度是 AI 覺得「有多像」的分數，從 0 到 1。下面是你比剪刀時，AI 心裡可能的樣子：</p>
+      <div class="conf" aria-label="信心度範例">
+        <div><span>剪刀</span><i style="--w:86%"></i><span>0.86</span></div>
+        <div><span>石頭</span><i style="--w:9%"></i><span>0.09</span></div>
+        <div><span>布</span><i style="--w:3%"></i><span>0.03</span></div>
+        <div><span>沒有手勢</span><i style="--w:2%"></i><span>0.02</span></div>
+      </div>
+      <p>剪刀最高，所以識別結果是「剪刀」。如果最高的只有 0.4，代表 AI 其實不太確定，這時候先不要動作比較好。</p>
+      <div class="tip"><b>我們班的規定：一定要有「沒有手勢」這一類</b><p>AI 一定會從學過的類別裡挑一個最像的，就算你什麼都沒比。所以要專門教它一類「空空的畫面」，它才不會亂猜。</p></div>
+    </div>
+  </section>
+
+  <section id="blocks">
+    <div class="sec-head"><span class="tag">第 1 關</span><h2>機器學習積木圖鑑</h2><p>加入 Teachable Machine 擴展、訓練完模型後，積木區會出現下面這些積木。畫面上的文字如果和講義有一點不同，以畫面為準。</p></div>
+    <div class="guide" id="guide"></div>
+  </section>
+
+  <section id="basic">
+    <div class="sec-head"><span class="tag">第 2 關</span><h2>基本操作七步驟</h2><p>每完成一步就勾「完成」，勾選會記在這台電腦的瀏覽器裡。</p></div>
+    <ol class="steplist" id="basic-steps"></ol>
+  </section>
+
+  <section id="p1"></section>
+  <section id="p2"></section>
+  <section id="p3"></section>
+
+  <section id="lab">
+    <div class="sec-head"><span class="tag">AI 實驗室</span><h2>當一次 AI 科學家</h2><p>做遊戲之外，也來做實驗：改一個條件，每個手勢各比 10 次，記下 AI 認對幾次。數字會存在這台電腦，也可以抄到學習單上。</p></div>
+    <div class="labgrid" id="labgrid"></div>
+  </section>
+
+  <section id="ideas">
+    <div class="sec-head"><span class="tag">更多點子</span><h2>同一招，還能做什麼？</h2><p>只要換掉訓練照片和類別名稱，就能做出新作品。先寫好類別名稱卡再開工。</p></div>
+    <div class="ideas" id="ideagrid"></div>
+  </section>
+
+  <section id="help">
+    <div class="sec-head"><span class="tag">卡關了</span><h2>常見問題</h2></div>
+    <div class="faq" id="faq"></div>
+  </section>
+
+  <footer>mBlock 是 Makeblock 推出的積木程式工具。訓練時請拍手勢和物品，不拍同學的臉；作品分享時也不要放自己或同學的照片。</footer>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/scratchblocks@3.6.4/build/scratchblocks.min.js"></script>
+<script>const ZH_TW = {"commands":{"MOTION_MOVESTEPS":"移動 %1 點","MOTION_TURNRIGHT":"右轉 @turnRight %1 度","MOTION_TURNLEFT":"左轉 @turnLeft %1 度","MOTION_POINTINDIRECTION":"面朝 %1 度","MOTION_POINTTOWARDS":"面朝 %1 向","MOTION_GOTOXY":"定位到 x:%1 y:%2","MOTION_GOTO":"定位到 %1 位置","MOTION_GLIDESECSTOXY":"滑行 %1 秒到 x:%2 y:%3","MOTION_GLIDETO":"滑行 %1 秒到 %2 位置","MOTION_CHANGEXBY":"x 改變 %1","MOTION_SETX":"x 設為 %1","MOTION_CHANGEYBY":"y 改變 %1","MOTION_SETY":"y 設為 %1","MOTION_SETROTATIONSTYLE":"迴轉方式設為 %1","LOOKS_SAYFORSECS":"說出 %1 持續 %2 秒","LOOKS_SAY":"說出 %1","LOOKS_THINKFORSECS":"想著 %1 持續 %2 秒","LOOKS_THINK":"想著 %1","LOOKS_SHOW":"顯示","LOOKS_HIDE":"隱藏","LOOKS_SWITCHCOSTUMETO":"造型換成 %1","LOOKS_NEXTCOSTUME":"造型換成下一個","LOOKS_NEXTBACKDROP_BLOCK":"背景換成下一個","LOOKS_SWITCHBACKDROPTO":"背景換成 %1","LOOKS_SWITCHBACKDROPTOANDWAIT":"背景換成 %1 並等待","LOOKS_CHANGEEFFECTBY":"圖像效果 %1 改變 %2","LOOKS_SETEFFECTTO":"圖像效果 %1 設為 %2","LOOKS_CLEARGRAPHICEFFECTS":"圖像效果清除","LOOKS_CHANGESIZEBY":"尺寸改變 %1","LOOKS_SETSIZETO":"尺寸設為 %1 %","LOOKS_GOTOFRONTBACK":"圖層移到 %1 層","LOOKS_GOFORWARDBACKWARDLAYERS":"圖層 %1 移 %2 層","SOUND_PLAY":"播放音效 %1","SOUND_CHANGEEFFECTBY":"聲音效果 %1 改變 %2","SOUND_SETEFFECTO":"聲音效果 %1 設為 %2","SOUND_CLEAREFFECTS":"聲音效果清除","SOUND_PLAYUNTILDONE":"播放音效 %1 直到結束","SOUND_STOPALLSOUNDS":"停播所有音效","music.playDrumForBeats":"演奏節拍 %1 %2 拍","music.restForBeats":"演奏休息 %1 拍","music.playNoteForBeats":"演奏音階 %1 %2 拍","music.setInstrument":"演奏樂器設為 %1","SOUND_CHANGEVOLUMEBY":"音量改變 %1","SOUND_SETVOLUMETO":"音量設為 %1%","music.changeTempo":"演奏速度改變 %1","music.setTempo":"演奏速度設為 %1","pen.clear":"筆跡全部清除","pen.stamp":"蓋章","pen.penDown":"下筆","pen.penUp":"停筆","pen.setColor":"筆跡顏色設為 %1","pen.changeHue":"筆跡顏色改變 %1","pen.setColorParam":"筆跡 %1 設為 %2","pen.changeColorParam":"筆跡 %1 改變 %2","pen.setHue":"筆跡顏色設為 %1","pen.changeShade":"筆跡亮度改變 %1","pen.setShade":"筆跡亮度設為 %1","pen.changeSize":"筆跡寬度改變 %1","pen.setSize":"筆跡寬度設為 %1","EVENT_WHENFLAGCLICKED":"當 @greenFlag 被點擊","EVENT_WHENKEYPRESSED":"當 %1 鍵被按下","EVENT_WHENTHISSPRITECLICKED":"當角色被點擊","EVENT_WHENSTAGECLICKED":"當舞台被點擊","EVENT_WHENBACKDROPSWITCHESTO":"當背景換成 %1","EVENT_WHENGREATERTHAN":"當 %1 > %2","EVENT_WHENBROADCASTRECEIVED":"當收到訊息 %1","EVENT_BROADCAST":"廣播訊息 %1","EVENT_BROADCASTANDWAIT":"廣播訊息 %1 並等待","CONTROL_WAIT":"等待 %1 秒","CONTROL_REPEAT":"重複 %1 次","CONTROL_FOREVER":"重複無限次","CONTROL_IF":"如果 %1 那麼","CONTROL_WAITUNTIL":"等待直到 %1","CONTROL_REPEATUNTIL":"重複直到 %1","CONTROL_STOP":"停止 %1","CONTROL_STARTASCLONE":"當分身產生","CONTROL_CREATECLONEOF":"建立 %1 的分身","CONTROL_DELETETHISCLONE":"分身刪除","SENSING_ASKANDWAIT":"詢問 %1 並等待","videoSensing.videoToggle":"視訊設為 %1","videoSensing.setVideoTransparency":"視訊透明度設為 %1","videoSensing.whenMotionGreaterThan":"當視訊動作 > %1","SENSING_RESETTIMER":"計時器重置","DATA_SETVARIABLETO":"變數 %1 設為 %2","DATA_CHANGEVARIABLEBY":"變數 %1 改變 %2","DATA_SHOWVARIABLE":"變數 %1 顯示","DATA_HIDEVARIABLE":"變數 %1 隱藏","DATA_ADDTOLIST":"添加 %1 到 %2","DATA_DELETEOFLIST":"刪除 %2 的第 %1 項","DATA_DELETEALLOFLIST":"刪除 %1 的所有項目","MOTION_IFONEDGEBOUNCE":"碰到邊緣就反彈","DATA_INSERTATLIST":"插入 %1 到 %3 的第 %2 項","DATA_REPLACEITEMOFLIST":"替換 %2 的第 %1 項為 %3","DATA_SHOWLIST":"清單 %1 顯示","DATA_HIDELIST":"清單 %1 隱藏","SENSING_OF_XPOSITION":"x 座標","SENSING_OF_YPOSITION":"y 座標","SENSING_OF_DIRECTION":"方向","SENSING_OF_COSTUMENUMBER":"造型編號","LOOKS_COSTUMENUMBERNAME":"造型 %1","SENSING_OF_SIZE":"尺寸","SENSING_OF_BACKDROPNAME":"背景名稱","LOOKS_BACKDROPNUMBERNAME":"背景 %1","SENSING_OF_BACKDROPNUMBER":"背景編號","SOUND_VOLUME":"音量","music.getTempo":"演奏速度","SENSING_TOUCHINGOBJECT":"碰到 %1？","SENSING_TOUCHINGCOLOR":"碰到顏色 %1？","SENSING_COLORISTOUCHINGCOLOR":"顏色 %1 碰到 顏色 %2？","SENSING_DISTANCETO":"與 %1 的間距","SENSING_ANSWER":"詢問的答案","SENSING_KEYPRESSED":"%1 鍵被按下？","SENSING_MOUSEDOWN":"滑鼠鍵被按下？","SENSING_MOUSEX":"鼠標的 x","SENSING_MOUSEY":"鼠標的 y","SENSING_SETDRAGMODE":"拖曳方式設為 %1","SENSING_LOUDNESS":"聲音響度","videoSensing.videoOn":"%2 的視訊 %1","SENSING_TIMER":"計時器","SENSING_OF":"%2 的 %1","SENSING_CURRENT":"目前時間的 %1","SENSING_DAYSSINCE2000":"2000年迄今日數","SENSING_USERNAME":"用戶名稱","OPERATORS_ADD":"%1 + %2","OPERATORS_SUBTRACT":"%1 - %2","OPERATORS_MULTIPLY":"%1 * %2","OPERATORS_DIVIDE":"%1 / %2","OPERATORS_RANDOM":"隨機取數 %1 到 %2","OPERATORS_LT":"%1 < %2","OPERATORS_EQUALS":"%1 = %2","OPERATORS_GT":"%1 > %2","OPERATORS_AND":"%1 且 %2","OPERATORS_OR":"%1 或 %2","OPERATORS_NOT":"%1 不成立","OPERATORS_JOIN":"字串組合 %1 %2","OPERATORS_LETTEROF":"字串 %2 的第 %1 字","OPERATORS_LENGTH":"字串 %1 的長度","OPERATORS_MOD":"%1 除以 %2 的餘數","OPERATORS_ROUND":"四捨五入數值 %1","OPERATORS_MATHOP":"%1 數值 %2","OPERATORS_CONTAINS":"字串 %1 包含 %2？","DATA_ITEMOFLIST":"%2 的第 %1 項","DATA_ITEMNUMOFLIST":"%1 在 %2 裡的項目編號","DATA_LENGTHOFLIST":"清單 %1 的長度","DATA_LISTCONTAINSITEM":"清單 %1 包含 %2？","CONTROL_ELSE":"否則","SENSING_USERID":"用戶 ID","SENSING_LOUD":"大聲？","text2speech.speakAndWaitBlock":"唸出 %1","text2speech.setVoiceBlock":"語音設為 %1","text2speech.setLanguageBlock":"語言設為 %1","translate.translateBlock":"文字 %1 翻譯成 %2","translate.viewerLanguage":"瀏覽者的語言","makeymakey.whenKeyPressed":"當 %1 按鈕被按下","makeymakey.whenKeysPressedInOrder":"當 %1 按鈕被依序按下","microbit.whenButtonPressed":"當按鈕 %1 被按下","microbit.isButtonPressed":"按鈕 %1 被按下？","microbit.whenGesture":"當 %1","microbit.displaySymbol":"顯示圖示 %1","microbit.displayText":"顯示文字 %1","microbit.clearDisplay":"清空畫面","microbit.whenTilted":"當傾斜 %1","microbit.isTilted":"傾斜 %1？","microbit.tiltAngle":"傾斜角度 %1","microbit.whenPinConnected":"當引腳 %1 接地","ev3.motorTurnClockwise":"馬達 埠%1 順時針旋轉 %2 秒","ev3.motorTurnCounterClockwise":"馬達 埠%1 逆時針旋轉 %2 秒","ev3.motorSetPower":"馬達 埠%1 動力設為 %2 %","ev3.getMotorPosition":"馬達 埠%1 轉向角度","ev3.whenButtonPressed":"當按鈕 %1 被按下","ev3.whenDistanceLessThan":"當距離 < %1","ev3.whenBrightnessLessThan":"當亮度 < %1","ev3.buttonPressed":"按鈕 %1 被按下？","ev3.getDistance":"距離","ev3.getBrightness":"亮度","ev3.beepNote":"演奏音階 %1 持續 %2 秒","wedo2.motorOn":"%1 啟動","wedo2.motorOff":"%1 停止","wedo2.startMotorPower":"%1 動力設為 %2","wedo2.setMotorDirection":"%1 方向設為 %2","wedo2.whenDistance":"當距離 %1 %2","wedo2.getDistance":"距離","wedo2.motorOnFor":"%1 啟動 持續 %2 秒","wedo2.setLightHue":"LED 顏色設為 %1","wedo2.playNoteFor":"演奏音階 %1 持續 %2 秒","wedo2.whenTilted":"當傾斜 %1","wedo2.isTilted":"傾斜 %1？","wedo2.getTiltAngle":"傾斜角度 %1","gdxfor.whenGesture":"當 %1","gdxfor.whenForcePushedOrPulled":"當重力感測器%1","gdxfor.getForce":"力量","gdxfor.whenTilted":"當傾斜 %1","gdxfor.isTilted":"傾斜 %1？","gdxfor.getTilt":"傾斜角度 %1","gdxfor.isFreeFalling":"自由掉落？","gdxfor.getSpin":"旋轉速度 %1","gdxfor.getAcceleration":"加速度 %1","boost.motorOnFor":"%1 啟動 持續 %2 秒","boost.motorOnForRotation":"%1 啟動 持續 %2 圈","boost.motorOn":"%1 啟動","boost.motorOff":"%1 停止","boost.setMotorPower":"%1 動力設為 %2 %","boost.setMotorDirection":"%1 方向設為 %2","boost.getMotorPosition":"%1 轉向角度","boost.whenColor":"當顏色 %1  被看到","boost.seeingColor":"看到顏色 %1？","boost.whenTilted":"當傾斜 %1","boost.getTiltAngle":"傾斜角度 %1","boost.setLightHue":"LED 顏色設為 %1"},"dropdowns":{},"ignorelt":[],"soundEffects":["音高","聲道左/右"],"microbitWhen":["移動","晃動","跳動"],"osis":["這個物件的其它程式"],"definePrefix":["定義"],"defineSuffix":[],"palette":{"Motion":"動作","Looks":"外觀","Sound":"音效","Events":"事件","Control":"控制","Sensing":"偵測","Operators":"運算","Variables":"變數","My Blocks":"函式積木"},"math":["絕對值","無條件捨去","無條件進位","平方根","sin","cos","tan","asin","acos","atan","ln","log","e ^","10 ^"],"aliases":{"左轉 %1 度":"MOTION_TURNLEFT","右轉 %1 度":"MOTION_TURNRIGHT","當綠旗被點擊時":"EVENT_WHENFLAGCLICKED","結束":"scratchblocks:end"},"name":"繁體中文","percentTranslated":100};</script>
+<script>
+/* markup: {c:類別} palette chip · {b:按鈕} UI button · {t:分頁} tab · {k:積木} inline block */
+const CAT = {"動作":"--b-mo","外觀":"--b-lo","音效":"--b-so","事件":"--b-ev","控制":"--b-ct","偵測":"--b-se","運算":"--b-op","變數":"--b-va","TM":"--b-ext"};
+const esc = s => s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function rich(t){
+  return t.split(/(\{(?:c|b|t|k):[^}]*\})/).map(part=>{
+    const m = part.match(/^\{(c|b|t|k):([^}]*)\}$/);
+    if(!m) return esc(part);
+    if(m[1]==="c") return `<span class="cat" style="--cc:var(${CAT[m[2]]||"--b-ext"})">${esc(m[2])}</span>`;
+    if(m[1]==="b") return `<span class="btn">${esc(m[2])}</span>`;
+    if(m[1]==="t") return `<span class="tab">${esc(m[2])}</span>`;
+    return `<span class="ib" data-code="${esc(m[2])}">${esc(m[2])}</span>`;
+  }).join("");
+}
+const script = (code,cap) => `<div class="script"><div class="cap">${esc(cap||"")}</div><div class="area"><div class="sbcode" data-code="${esc(code)}">${esc(code)}</div></div></div>`;
+const labels = arr => `<div class="labels">${arr.map((x,i)=>{const [n,d]=x.split("｜");return `<div class="lab${i===0?" bgl":""}"><span class="nm">${esc(n)}</span><span>${esc(d||"")}</span></div>`;}).join("")}</div>`;
+const box = (cls,title,text) => `<div class="${cls}"><b>${esc(title)}</b><p>${rich(text)}</p></div>`;
+
+/* ---------- field guide ---------- */
+const G = [
+  ["group","訓練與識別"],
+  ["btn:訓練模型","在 {c:TM} 積木區最上面。點下去打開訓練視窗，在裡面拍照、取類別名稱。"],
+  ["btn:開啟識別視窗","AI 要開始看鏡頭時點這個。識別視窗開著，程式才拿得到識別結果。"],
+  ["group","看結果（訓練完才會出現）"],
+  ["(識別結果 :: extension)","AI 現在猜的類別名稱，例如「剪刀」。勾選左邊方框，舞台上就會一直顯示。"],
+  ["<識別結果為 (剪刀 v) ？ :: extension>","AI 是不是猜「剪刀」？是就成立。最常放在「如果」積木裡。"],
+  ["(信心度 (剪刀 v) :: extension)","AI 覺得像「剪刀」的分數，0 到 1 之間。0.8 就是八成把握。"],
+  ["group","搭配的一般積木"],
+  ["<<識別結果為 (剪刀 v) ？ :: extension> and <(信心度 (剪刀 v) :: extension) > (0.8)>>","我們最常用的組合：猜是剪刀，而且有八成以上把握，才算數。"]
+];
+document.getElementById("guide").innerHTML = G.map(([a,b])=> a==="group"
+  ? `<div class="ggroup">${esc(b)}</div>`
+  : `<div class="gitem${a.length>60?" wide":""}"><div class="g">${a.startsWith("btn:")?`<span class="btn">${esc(a.slice(4))}</span>`:`<span class="ib big" data-code="${esc(a)}"></span>`}</div><p>${rich(b)}</p></div>`).join("");
+
+/* ---------- basic steps ---------- */
+const BASIC = [
+  {h:"打開 mBlock 網頁版",p:"用 Chrome 打開 ide.mblock.cc。左下方有 {t:設備}、{t:角色}、{t:背景} 三個分頁，點 {t:角色}，選中貓熊（Panda）。",
+   extra:box("tip","機器學習要加在「角色」上","選到 {t:設備} 時找不到機器學習擴展。記得先切到 {t:角色}。")},
+  {h:"加入 Teachable Machine 擴展",p:"點積木區最下面的 {b:＋ 擴展}，在擴展中心找到 Teachable Machine，按 {b:＋ 添加}。回到程式畫面，積木區會多出 {c:TM} 類別。瀏覽器問能不能用攝影機，按 {b:允許}。"},
+  {h:"寫好類別名稱卡",p:"先決定要教 AI 幾種手勢，每一類取一個短短的中文名字。一定要有「沒有手勢」。下面是剪刀石頭布的例子，寫在便利貼上貼在螢幕旁。",
+   extra:labels(["沒有手勢｜空畫面、手放下","剪刀｜比 YA","石頭｜握拳","布｜張開手掌"])},
+  {h:"打開訓練視窗，拍照",p:"點 {c:TM} 裡的 {b:訓練模型}。視窗裡每一類都有一個 {b:學習} 按鈕。比出手勢，按住 {b:學習} 不放，就會一直拍照；邊拍邊把手稍微移動、轉角度、拉近拉遠。每一類拍 30 張以上再放開。點類別名稱就能改成「剪刀」「石頭」這些名字。",
+   extra:box("tip","類別不夠用？","視窗裡可以新增類別。「沒有手勢」這一類就拍空空的畫面，和自己手放下的樣子。")},
+  {h:"在視窗裡測試",p:"拍完後，對著鏡頭輪流比每個手勢，視窗會顯示每一類的信心度長條，最高的就是識別結果。",
+   extra:`<ul><li>${rich("某個手勢的信心度老是不高 → 比著那個手勢，再按住 {b:學習} 多拍一些。")}</li><li>${rich("手放下時亂猜 → 「沒有手勢」那一類多拍一些。")}</li><li>${rich("拍壞了想全部重來 → 按 {b:建立新模型}。")}</li></ul>`},
+  {h:"使用模型，寫第一個程式",p:"都測好之後，按 {b:使用模型} 回到程式畫面。{c:TM} 裡會多出識別結果的積木。先點 {b:開啟識別視窗}，再拼出下面的程式，按綠旗試試看。",
+   extra:script(`when flag clicked
+forever
+say (識別結果 :: extension)
+end`,"貓熊角色：說出 AI 看到什麼")+
+   `<p>${rich("再升級：只有很有把握時才說話。")}</p>`+
+   script(`when flag clicked
+forever
+if <<識別結果為 (剪刀 v) ？ :: extension> and <(信心度 (剪刀 v) :: extension) > (0.8)>> then
+say [你出剪刀！]
+else
+say []
+end
+end`,"貓熊角色：八成把握才算數")},
+  {h:"存檔",p:"點上方選單 {b:檔案} → {b:儲存到你的電腦}，存下 .mblock 專案檔。有登入 mBlock 帳號的同學，也可以按 {b:儲存} 存到雲端。",
+   extra:box("tip","存完檢查一次","重新打開專案，點 {b:訓練模型} 看看照片和類別還在不在。如果不見了，就照第 4 步重新拍，只要幾分鐘。")}
+];
+document.getElementById("basic-steps").innerHTML = BASIC.map((s,i)=>stepHTML("b"+(i+1),s)).join("");
+
+function stepHTML(id,s){
+  return `<li class="step" id="st-${id}"><div class="step-top"><h3>${esc(s.h)}</h3><label class="done"><input type="checkbox" id="ck-${id}" data-step="st-${id}">完成</label></div>
+  <div class="body"><p>${rich(s.p)}</p>${s.code?script(s.code,s.cap):""}${s.extra||""}</div></li>`;
+}
+
+/* ---------- projects ---------- */
+const P = [
+ {id:"p1",tag:"專題 A",title:"AI 魔法手勢施法",level:["入門","l1"],learn:"學到：多種類別辨識、信心度門檻、用廣播讓不同角色動起來。",
+  intro:"你是一位魔法師，比出不同手勢就能施放不同魔法。",
+  labels:["沒有手勢｜空畫面","火球｜張開手掌","防護罩｜握拳","治療｜比讚"],
+  steps:[
+   {h:"準備角色",p:"把貓熊當法師（或換成 Wizard）。再新增「火球」「防護罩」「愛心」三個角色，可以自己畫，也可以從角色庫挑 Ball、Ripples、Heart 再改顏色。"},
+   {h:"訓練四個類別",p:"打開 {b:訓練模型}，照類別名稱卡把四個類別改名、拍照，每類 30 張以上。測試到都認得對，再按 {b:使用模型}。"},
+   {h:"法師：有把握才施法",p:"法師一直看識別結果，猜到某個魔法、而且信心度超過 0.8，就喊出咒語並廣播。施完法等 1 秒，才不會一下放出一大堆。",
+    code:`when flag clicked
+forever
+if <<識別結果為 (火球 v) ？ :: extension> and <(信心度 (火球 v) :: extension) > (0.8)>> then
+say [火球術！] for (0.5) seconds
+broadcast (火球 v)
+wait (1) seconds
+end
+if <<識別結果為 (防護罩 v) ？ :: extension> and <(信心度 (防護罩 v) :: extension) > (0.8)>> then
+say [防護罩！] for (0.5) seconds
+broadcast (防護罩 v)
+wait (1) seconds
+end
+if <<識別結果為 (治療 v) ？ :: extension> and <(信心度 (治療 v) :: extension) > (0.8)>> then
+say [治療！] for (0.5) seconds
+broadcast (治療 v)
+wait (1) seconds
+end
+end`,cap:"法師角色"},
+   {h:"火球：從法師身上飛出去",p:"火球收到廣播，先移到法師的位置，再往右飛，邊飛邊換造型。",
+    code:`when flag clicked
+hide
+
+when I receive [火球 v]
+go to (法師 v)
+point in direction (90)
+show
+repeat (25)
+move (15) steps
+next costume
+end
+hide`,cap:"火球角色"},
+   {h:"防護罩和愛心",p:"防護罩出現 2 秒、半透明；愛心從法師頭上慢慢飄起來再消失。",
+    code:`when I receive [防護罩 v]
+go to (法師 v)
+set [幻影 v] effect to (50)
+show
+wait (2) seconds
+hide
+
+when I receive [治療 v]
+go to (法師 v)
+set [幻影 v] effect to (0)
+show
+repeat (20)
+change y by (3)
+change [幻影 v] effect by (5)
+end
+hide`,cap:"防護罩角色 · 愛心角色"}],
+  challenges:[["加音效","每個魔法配一個音效，用 {k:start sound (Magic Spell v)}。"],["多一招","在訓練視窗新增一個類別（例如「閃電」比 OK），做第四種魔法。"],["門檻實驗","把 0.8 改成 0.5 和 0.95 各玩一次，哪個最剛好？"]]},
+
+ {id:"p2",tag:"專題 B",title:"AI 手勢太空船",level:["入門","l1"],learn:"學到：把 AI 的結果變成遊戲操控，取代鍵盤。",
+  intro:"不用鍵盤！用手勢讓太空船左右移動、握拳發射子彈，打掉掉下來的隕石。",
+  labels:["沒有手勢｜停住","左｜手指向左","右｜手指向右","發射｜握拳"],
+  steps:[
+   {h:"準備角色和變數",p:"新增三個角色並改名：「太空船」（Rocketship）、「子彈」（Ball，縮小）、「隕石」（Rocks）。到 {c:變數} 建立「分數」和「生命」兩個變數。"},
+   {h:"訓練四個類別",p:"照類別名稱卡訓練。指左、指右時，手要明顯放在畫面的左邊或右邊，AI 比較好分。"},
+   {h:"太空船：一直看識別結果",p:"在 {k:forever} 裡一直檢查 {k:<識別結果為 (左 v) ？ :: extension>}，太空船才會連續移動。這裡門檻設 0.7，反應比較快。",
+    code:`when flag clicked
+go to x: (0) y: (-140)
+set [生命 v] to (3)
+forever
+if <<識別結果為 (左 v) ？ :: extension> and <(信心度 (左 v) :: extension) > (0.7)>> then
+change x by (-8)
+end
+if <<識別結果為 (右 v) ？ :: extension> and <(信心度 (右 v) :: extension) > (0.7)>> then
+change x by (8)
+end
+if <(生命) < [1]> then
+say [遊戲結束！]
+stop [全部 v]
+end
+end
+
+when flag clicked
+forever
+if <<識別結果為 (發射 v) ？ :: extension> and <(信心度 (發射 v) :: extension) > (0.7)>> then
+create clone of (子彈 v)
+wait (0.3) seconds
+end
+end`,cap:"太空船角色"},
+   {h:"子彈：往上飛",p:"握拳不放會每 0.3 秒連發一顆。子彈的分身從太空船出發，一直往上飛，碰到邊緣就消失。",
+    code:`when flag clicked
+hide
+
+when I start as a clone
+go to (太空船 v)
+show
+repeat until <touching (邊緣 v)?>
+change y by (12)
+end
+delete this clone`,cap:"子彈角色"},
+   {h:"隕石：從天上掉下來",p:"每 1.5 秒生一顆隕石分身。被子彈打到加 1 分；撞到太空船扣 1 條命。",
+    code:`when flag clicked
+hide
+set [分數 v] to (0)
+forever
+create clone of (自己 v)
+wait (1.5) seconds
+end
+
+when I start as a clone
+go to x: (pick random (-220) to (220)) y: (180)
+show
+repeat until <(y position) < (-170)>
+change y by (-4)
+if <touching (子彈 v)?> then
+change [分數 v] by (1)
+delete this clone
+end
+if <touching (太空船 v)?> then
+change [生命 v] by (-1)
+delete this clone
+end
+end
+delete this clone`,cap:"隕石角色"}],
+  challenges:[["越來越難","分數越高，隕石掉越快：把 -4 改成 {k:((-4) - ((分數) / (5)))}。"],["保護罩","新增一個類別「保護」，比出時太空船 2 秒內不會被撞。"],["電腦太慢？","如果畫面卡卡的，把隕石改成每 2 秒一顆，或關掉其他分頁。"]]},
+
+ {id:"p3",tag:"專題 C",title:"AI 元素魔王挑戰",level:["進階","l3"],learn:"學到：條件判斷、變數、血量與遊戲平衡。這是剪刀石頭布的升級版！",
+  intro:"魔王每回合會放出一種屬性，你要比出剋制它的屬性：水剋火、火剋草、草剋水。打倒魔王就贏了！",
+  labels:["沒有手勢｜沒出招","火｜握拳","水｜張開手掌","草｜比 YA"],
+  steps:[
+   {h:"準備角色和變數",p:"新增「魔王」和「勇者」兩個角色。魔王畫三個造型，造型名稱分別改成「火」「水」「草」。到 {c:變數} 建立：魔王血量、我的血量、魔王屬性、我的屬性、對戰。"},
+   {h:"訓練四個類別",p:"類別名稱就直接取「火」「水」「草」「沒有手勢」。這樣識別結果本身就是屬性名字，程式會簡單很多。"},
+   {h:"魔王：每回合出一種屬性",p:"魔王隨機換造型，把造型名稱存進「魔王屬性」，喊出來給你 3 秒準備，再廣播「對決」並等勇者算完傷害。一直重複，直到有人血量歸零。",
+    code:`when flag clicked
+set [魔王血量 v] to (100)
+set [我的血量 v] to (50)
+repeat until <<(魔王血量) < [1]> or <(我的血量) < [1]>>
+switch costume to (pick random (1) to (3))
+set [魔王屬性 v] to (costume [名稱 v])
+say (join [我要放] (魔王屬性)) for (1) seconds
+say [3] for (1) seconds
+say [2] for (1) seconds
+say [1] for (1) seconds
+broadcast (對決 v) and wait
+end
+if <(魔王血量) < [1]> then
+say [可惡……我輸了！]
+else
+say [哈哈哈，你被打敗了！]
+end`,cap:"魔王角色"},
+   {h:"勇者：讀出你的屬性",p:"先當作沒出招；如果 AI 猜到火、水或草，而且信心度超過 0.8，才把那個屬性存進「我的屬性」，免得 AI 亂猜也算數。",
+    code:`when I receive [對決 v]
+set [我的屬性 v] to [沒出招]
+if <<識別結果為 (火 v) ？ :: extension> and <(信心度 (火 v) :: extension) > (0.8)>> then
+set [我的屬性 v] to [火]
+end
+if <<識別結果為 (水 v) ？ :: extension> and <(信心度 (水 v) :: extension) > (0.8)>> then
+set [我的屬性 v] to [水]
+end
+if <<識別結果為 (草 v) ？ :: extension> and <(信心度 (草 v) :: extension) > (0.8)>> then
+set [我的屬性 v] to [草]
+end
+broadcast (算傷害 v) and wait`,cap:"勇者角色"},
+   {h:"勇者：判斷有沒有剋制",p:"把「我的屬性」和「魔王屬性」接成一個詞存進「對戰」。我剋制魔王只有三種：水火、火草、草水。剋制成功魔王扣 20 血，失敗我扣 10 血。",
+    code:`when I receive [算傷害 v]
+set [對戰 v] to (join (我的屬性) (魔王屬性))
+if <<(對戰) = [水火]> or <<(對戰) = [火草]> or <(對戰) = [草水]>>> then
+change [魔王血量 v] by (-20)
+say [剋制成功！] for (1) seconds
+else
+change [我的血量 v] by (-10)
+say [好痛！] for (1) seconds
+end`,cap:"勇者角色"}],
+  challenges:[["技能特效","剋制成功時讓魔王閃一下：{k:repeat (5)} 裡放 {k:change [顏色 v] effect by (25)}。"],["遊戲平衡","魔王太難打？試著改扣血的數字，讓遊戲剛好有點難又打得贏。"],["倒數計時","用 {k:(timer)} 限制 60 秒內打倒魔王，時間到就輸。"]]}
+];
+
+for(const p of P){
+  document.getElementById(p.id).innerHTML = `
+    <div class="sec-head"><span class="tag">${esc(p.tag)}</span>
+      <div class="proj-head"><h2>${esc(p.title)}</h2><span class="level ${p.level[1]}">${esc(p.level[0])}</span></div>
+      <p>${esc(p.intro)}</p><p class="learn">${esc(p.learn)}</p></div>
+    <div class="card"><h3 style="font-size:20px">類別名稱卡</h3>${labels(p.labels)}</div>
+    <ol class="steplist">${p.steps.map((s,i)=>stepHTML(p.id+"-"+(i+1),s)).join("")}</ol>
+    <div class="card"><h3 style="font-size:20px">挑戰升級（任選）</h3><div class="challenge">${p.challenges.map(c=>`<div><h4>${esc(c[0])}</h4><p>${rich(c[1])}</p></div>`).join("")}</div></div>`;
+}
+
+/* ---------- lab ---------- */
+const LAB = [
+  {h:"實驗 1：照片多少有差嗎？",p:"按 {b:建立新模型}，每類只拍 10 張，測試；再重來一次，每類拍 50 張，再測試。",rows:["每類 10 張：認對幾次（共 10 次）","每類 50 張：認對幾次（共 10 次）"],q:"照片越多一定越好嗎？你發現什麼？"},
+  {h:"實驗 2：換人還認得嗎？",p:"用你的手訓練，請同學來比同樣的手勢。接著把同學的手也拍進去，再測一次。",rows:["只用我的手訓練，同學來比","我和同學的手都拍進去，同學來比"],q:"為什麼換人會不準？要怎麼讓 AI 認得更多人？"},
+  {h:"實驗 3：光線會影響嗎？",p:"在亮的地方訓練好，然後把燈關掉一半或拉上窗簾再測試。看看信心度有沒有變低。",rows:["明亮時認對幾次","昏暗時認對幾次"],q:"生活中的 AI（例如人臉解鎖）晚上會不會比較難用？"},
+  {h:"實驗 4：什麼都不比會怎樣？",p:"做一個沒有「沒有手勢」類別的模型，把手放下，看 AI 猜什麼、信心度多少。再把這一類加進去比較。",rows:["沒有這一類時，手放下 10 次，亂猜幾次","有這一類時，手放下 10 次，亂猜幾次"],q:"為什麼 AI 不會說「我不知道」？"},
+  {h:"實驗 5：門檻要設多少？",p:"把專題 A 的 0.8 改成不同數字，各玩 10 次，記下「該施法卻沒施法」和「沒比卻亂施法」的次數。",rows:["門檻 0.5：亂施法幾次","門檻 0.8：亂施法幾次","門檻 0.95：該施法卻沒施法幾次"],q:"門檻設太高或太低各有什麼問題？你會選多少？"}
+];
+document.getElementById("labgrid").innerHTML = LAB.map((e,i)=>`<div class="exp"><h3>${esc(e.h)}</h3><p>${rich(e.p)}</p>
+  <div class="rec">${e.rows.map((r,j)=>`<label for="lab-${i}-${j}">${esc(r)}</label><input id="lab-${i}-${j}" inputmode="numeric" placeholder="__ / 10">`).join("")}</div>
+  <label class="q" for="lab-${i}-q">${esc(e.q)}</label><textarea id="lab-${i}-q" placeholder="寫下你的想法"></textarea></div>`).join("");
+
+/* ---------- ideas ---------- */
+const IDEAS = [
+  ["AI 表情互動","訓練「開心」「驚訝」「難過」三種表情，角色跟著你的表情做反應。表情要誇張一點，AI 才分得出來。","可以自己做",true],
+  ["AI 垃圾分類小達人","拿紙張、寶特瓶、鋁罐給鏡頭看，類別就叫「紙類」「塑膠」「鋁罐」，角色把它丟進正確的回收桶。","可以自己做",true],
+  ["AI 虛擬寵物","揮手叫寵物過來、比讚餵食、握拳讓牠睡覺，再加上「飢餓值」「心情值」變數。","可以自己做",true],
+  ["AI 肢體動作闖關","往後站讓鏡頭拍到上半身，訓練舉雙手、身體左傾、右傾，控制角色閃避障礙。","可以自己做",true],
+  ["AI 手勢控制機器人","比手勢讓 mBot 這類機器人前進、轉彎。AI 在角色上辨識，再用廣播告訴機器人要做什麼。","老師帶著做",false]
+];
+document.getElementById("ideagrid").innerHTML = IDEAS.map(i=>`<div class="idea"><h3>${esc(i[0])}</h3><p>${esc(i[1])}</p><span class="fit${i[3]?"":" no"}">${esc(i[2])}</span></div>`).join("");
+
+/* ---------- faq ---------- */
+const FAQ = [
+  ["找不到 Teachable Machine 擴展","先確認左下角選的是 {t:角色}，不是 {t:設備}。機器學習擴展只能加在角色上。"],
+  ["訓練視窗看不到攝影機畫面","確認瀏覽器網址列右邊的攝影機圖示是「允許」。關掉其他也在用攝影機的分頁或視訊軟體，再重新整理頁面。"],
+  ["積木區沒有識別結果的積木","要先在訓練視窗按 {b:使用模型}，積木才會出現。"],
+  ["按綠旗後角色都沒反應","記得先點 {b:開啟識別視窗}，AI 才會開始看鏡頭。也勾選 {k:(識別結果 :: extension)} 看看它有沒有在變。"],
+  ["信心度一直不高","比著那個手勢多拍一些，背景盡量單純、光線亮一點。也可以把門檻從 0.8 降到 0.7 試試。"],
+  ["電腦變得很慢","辨識很吃電腦效能。關掉其他分頁；不用辨識時把識別視窗關掉。"],
+  ["存檔後打開，模型不見了","照基本操作第 4 步重新訓練就好。下次存檔後先打開檢查一次。"]
+];
+document.getElementById("faq").innerHTML = FAQ.map(f=>`<details><summary>${esc(f[0])}</summary><p>${rich(f[1])}</p></details>`).join("");
+
+/* ---------- draw Scratch-style blocks ---------- */
+(function(){
+  const sb = window.scratchblocks;
+  const all = document.querySelectorAll(".sbcode,.ib");
+  if(!sb){ all.forEach(el=>el.classList.add("fallback")); return; }
+  try{ if(ZH_TW) sb.loadLanguages({zh_tw:ZH_TW}); }catch(e){}
+  const tw = sb.allLanguages && sb.allLanguages.zh_tw;
+  all.forEach(el=>{
+    try{
+      const inline = el.classList.contains("ib");
+      const doc = sb.parse(el.dataset.code,{languages:["en"],inline});
+      if(tw) doc.translate(tw);
+      const scale = el.classList.contains("big") ? 0.85 : inline ? 0.75 : 0.9;
+      const svg = sb.newView(doc,{style:"scratch3",scale,inline}).render();
+      svg.setAttribute("role","img");
+      svg.setAttribute("aria-label",doc.stringify().replace(/\s*::\s*extension(\s+hat)?/g,"").replace(/ v\)/g,")").replace(/ v\]/g,"]"));
+      el.textContent=""; el.appendChild(svg);
+    }catch(e){ el.classList.add("fallback"); }
+  });
+})();
+
+/* ---------- remember ticks and lab records on this computer ---------- */
+const KEY="mblock-ml:";
+document.querySelectorAll(".done input").forEach(cb=>{
+  const card=document.getElementById(cb.dataset.step);
+  try{ cb.checked = localStorage.getItem(KEY+cb.id)==="1"; }catch(e){}
+  card.classList.toggle("is-done",cb.checked);
+  cb.addEventListener("change",()=>{ card.classList.toggle("is-done",cb.checked); try{ localStorage.setItem(KEY+cb.id,cb.checked?"1":"0"); }catch(e){} });
+});
+document.querySelectorAll(".exp input,.exp textarea").forEach(f=>{
+  try{ const v=localStorage.getItem(KEY+f.id); if(v!==null) f.value=v; }catch(e){}
+  f.addEventListener("input",()=>{ try{ localStorage.setItem(KEY+f.id,f.value); }catch(e){} });
+});
+const h=location.hash.slice(1); if(h&&document.getElementById(h)) document.getElementById(h).scrollIntoView();
+</script>
